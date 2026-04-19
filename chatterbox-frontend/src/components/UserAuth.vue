@@ -58,17 +58,43 @@
 </template>
 
 <script>
-  const $ = window.jQuery // JQuery
 
-  export default {
-
-    data () {
-      return {
-        email: '', username: '', password: ''
-      }
+export default {
+  data () {
+    return {
+      email: '',
+      username: '',
+      password: ''
     }
-
+  },
+  methods: {
+    signUp () {
+      $.post('http://localhost:8000/auth/users/', this.$data, (data) => {
+        alert('Your account has been created. You will be signed in automatically')
+        this.signIn()
+      })
+      .fail((response) => {
+        alert(response.responseText)
+      })
+    },
+    signIn () {
+      const credentials = { username: this.username, password: this.password }
+      $.post('http://localhost:8000/auth/token/login/', credentials, (data) => {
+        localStorage.setItem('authToken', data.auth_token)
+        localStorage.setItem('username', this.username)
+        this.$router.push('/chats')
+      })
+      .fail((response) => {
+        alert(response.responseText)
+      })
+    },
+    logout() {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('username');
+      this.$router.push('/auth');
+    }
   }
+}
 </script>
 
 <style scoped>
