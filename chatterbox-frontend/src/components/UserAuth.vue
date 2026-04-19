@@ -82,7 +82,7 @@ export default {
       $.post('http://localhost:8000/auth/token/login/', credentials, (data) => {
         localStorage.setItem('authToken', data.auth_token)
         localStorage.setItem('username', this.username)
-        this.$router.push('/chats')
+        this.$router.replace('/chats')
       })
       .fail((response) => {
         alert(response.responseText)

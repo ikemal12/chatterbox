@@ -33,6 +33,25 @@ class ChatSession(TrackableDateModel):
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
     uri = models.URLField(default=_generate_unique_uri)
 
+    # ---
+    # The following type hints are not required by Django, but help code editors and tools like Pylance
+    # understand that these attributes exist. Django creates them automatically because of the
+    # 'related_name' argument in the ForeignKey fields of ChatSessionMessage and ChatSessionMember.
+    # This silences attribute access warnings and helps with autocompletion.
+    #
+    # 'messages' is a reverse relation to ChatSessionMessage (one-to-many)
+    # 'members' is a reverse relation to ChatSessionMember (one-to-many)
+    #
+    # The 'id' field is automatically added by Django to all models unless you specify otherwise.
+    # ---
+    from typing import TYPE_CHECKING
+    if TYPE_CHECKING:
+        from django.db.models.manager import RelatedManager
+        from .models import ChatSessionMessage, ChatSessionMember
+        messages: "RelatedManager[ChatSessionMessage]"
+        members: "RelatedManager[ChatSessionMember]"
+        id: int
+
 
 class ChatSessionMessage(TrackableDateModel):
     """Store messages for a session."""

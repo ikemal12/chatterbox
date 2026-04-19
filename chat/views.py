@@ -29,23 +29,27 @@ class ChatSessionView(APIView):
         User = get_user_model()
 
         uri = kwargs['uri']
-        username = request.data['username']
-        user = User.objects.get(username=username)
+        username = request.data.get('username')
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Response({'status': 'ERROR', 'message': f'User {username} does not exist.'}, status=404)
 
         chat_session = ChatSession.objects.get(uri=uri)
         owner = chat_session.owner
 
-        if owner != user:  # Only allow non owners join the room             chat_session.members.get_or_create(
+        if owner != user:  # Only allow non owners join the room
+            chat_session.members.get_or_create(
                 user=user, chat_session=chat_session
             )
 
-        owner = deserialize_user(owner)
+        owner_data = deserialize_user(owner)
         members = [
-            deserialize_user(chat_session.user) 
-            for chat_session in chat_session.members.all()
+            deserialize_user(chat_session_member.user)
+            for chat_session_member in chat_session.members.all()
         ]
-        members.insert(0, owner)  # Make the owner the first member 
-        return Response ({
+        members.insert(0, owner_data)  # Make the owner the first member
+        return Response({
             'status': 'SUCCESS', 'members': members,
             'message': '%s joined the chat' % user.username,
             'user': deserialize_user(user)

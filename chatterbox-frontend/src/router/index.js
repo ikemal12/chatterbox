@@ -22,11 +22,19 @@ const router = new Router({
 })
 
 router.beforeEach((to, from, next) => {
-  if (sessionStorage.getItem('authToken') != null || to.path === '/auth') {
-    next()
+  const isAuthenticated = !!localStorage.getItem('authToken');
+  if (to.path !== '/auth' && !isAuthenticated) {
+    next('/auth');
+  } else if (to.path === '/auth' && isAuthenticated) {
+    // Prevent double redirect
+    if (from.path !== '/chats') {
+      next('/chats');
+    } else {
+      next(false); // Cancel navigation
+    }
   } else {
-    next('/auth')
+    next();
   }
-})
+});
 
 export default router
